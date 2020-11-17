@@ -1,66 +1,31 @@
 from music_code import music_code
-import mmh3
-import itertools
+from utils import *
+import argparse
+
+def kFilter(string):
+    k = int(string)
+    if k < 14 or k % 2 != 0:
+        raise argparse.ArgumentTypeError('K-mer length has to be an even number greater than 14.')
+    return k
+
+def seqFilter(string):
+    validDNA = 'ACGTN'
+    seq = string.upper()
+    if not all(i in validDNA for i in seq):
+        raise argparse.ArgumentTypeError('Sequence has a non-ACGTN character.')
+    return seq
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Generates musical compositions from DNA sequences')
+    parser.add_argument('-k', metavar='k', type=kFilter, help='K-mer length (k) for a musical phrase')
+    parser.add_argument('-s', metavar= 's', type=seqFilter, help='Sequence input as a string')
+    parser.add_argument('-f', metavar='f', help='Sequence input as FASTA/FASTQ')
+    parser.add_argument('-o', metavar='o', help='Output file (.wav) prefix')
+    args = parser.parse_args()
 
 # initialize
-m = music_code.MusicCode(120)
-
-def buildDisjointKmers(seq, k):
-    kmers = []
-    print(len(seq))
-    
-    for i in range(0, len(seq)- len(seq) % k, k):
-        kmer = seq[i:i+k]
-        print(i)
-        kmers.append(kmer)
-    return kmers
-
-def hashKmer(kmer):
-    h = mmh3.hash64(kmer, 42)[0]
-    if h < 0: h += 2**64
-    return h
-
-def getHashes(seq, k):
-    kmers = buildKmers(seq, k)
-    hashes = [hashKmer(kmer) for kmer in kmers]
-    return hashes
-
-def createDict():
-    scale = ['E2', 'F#2', 'G2', 'A2', 'B2', 'C3', 'D3', 'E3', 'F#3', 'G3', 'A3', 'B3', 'C4', 'D4', 'E4', 'rest']
-    alphabet = ['A', 'C', 'G', 'T']
-    noteDict = {}
-    perms = []
-    for i in range(4):
-        for j in range(4):
-            noteDict[alphabet[i] + alphabet[j]] = scale[j+4*i]
-    return noteDict
-    
-def createKmerPhrase(kmer, noteDict):
-    chunks = [kmer[i:i+2] for i in range(0, len(kmer), 2)]
-    if noteDict[chunks[0]] == 'rest':
-        phrase = m.rest(1/8)
-    else:
-        phrase = m.create_wave([noteDict[chunks[0]]],'sine', 1/8)
-    for i in range(1, len(chunks)):
-        if noteDict[chunks[i]] == 'rest':
-            print("rest")
-            phrase = m.join_waves((phrase, m.rest(1/8)))
-        else:
-            note = m.create_wave([noteDict[chunks[i]]], 'sine', 1/8)
-            phrase = m.join_waves((phrase, note))
-    return phrase
-
-def createSeqMelody(seq, k):
-    noteDict = createDict()
-    print(noteDict)
-    kmers = buildDisjointKmers(seq, k)
-    print(kmers)
-    phrases = [createKmerPhrase(kmer, noteDict) for kmer in kmers]
-    seqMelody = phrases[0]
-    for i in range(1, len(phrases)):
-        seqMelody = m.join_waves((seqMelody, phrases[i]))
-    return seqMelody
-
-seq = 'ACTTGTCAACGCATTGCACGTTGCAGCGACGCCTACGTTCGACACCCTTA'
-k = 16
-createSeqMelody(seq, k).bounce()
+seq = args.s
+k = args.k
+print('Sequence length %d, k-mer length %d' % (len(seq), k))
+createSeqMelody(seq, k).bounce(args.o, show_visual=False)
