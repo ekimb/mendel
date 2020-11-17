@@ -1,2 +1,2 @@
-# mendel
-generating music from sequences
+# `mendel`: Generating musical compositions from DNA sequences
+
