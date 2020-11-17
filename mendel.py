@@ -1,6 +1,7 @@
 from music_code import music_code
 from utils import *
 import argparse
+from Bio import SeqIO
 
 def kFilter(string):
     k = int(string)
@@ -27,10 +28,14 @@ if __name__ == "__main__":
 # initialize
 seq = args.s
 k = args.k
-print('Sequence length %d, k-mer length %d' % (len(seq), k))
-melody = createSeqMelody(seq, k)
-drums = drumBeat()
-melody.time()
-drums.time()
-final = m.add_waves((drums, melody))
-final.bounce(args.o)
+fasta_sequences = SeqIO.parse(open(args.f),'fasta')
+for fasta in fasta_sequences:
+    name, seq = str(fasta.id), str(fasta.seq)
+    print('Name: %s, sequence length %d, k-mer length %d' % (name, len(seq), k))
+    melody, duration = createSeqMelody(seq, k)
+    drums = drumBeat(duration)
+    melody.time()
+    drums.time()
+    final = m.add_waves((drums, melody))
+    final.bounce(args.o)
+
