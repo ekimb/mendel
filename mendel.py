@@ -28,4 +28,9 @@ if __name__ == "__main__":
 seq = args.s
 k = args.k
 print('Sequence length %d, k-mer length %d' % (len(seq), k))
-createSeqMelody(seq, k).bounce(args.o, show_visual=False)
+melody = createSeqMelody(seq, k)
+drums = drumBeat()
+melody.time()
+drums.time()
+final = m.add_waves((drums, melody))
+final.bounce(args.o)

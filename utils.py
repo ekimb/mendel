@@ -12,12 +12,20 @@ def buildDisjointKmers(seq, k):
         kmers.append(kmer)
     return kmers
 
+def GCcontent(lmer):
+    GC = 0
+    for char in lmer:
+        if char == 'G' or char == 'C':
+            GC += 1
+    return float(GC/len(lmer))
+
+
 def hashKmer(kmer):
     h = mmh3.hash64(kmer, 42)[0]
     if h < 0: h += 2**64
     return h
 
-def createDict():
+def createNoteDict():
     scale = ['E2', 'F#2', 'G2', 'A2', 'B2', 'C3', 'D3', 'E3', 'F#3', 'G3', 'A3', 'B3', 'C4', 'D4', 'E4', 'rest']
     alphabet = ['A', 'C', 'G', 'T']
     noteDict = {}
@@ -31,6 +39,27 @@ def createDict():
 
     return noteDict
 
+def createDurationList(kmer):
+    k = len(kmer)
+    durationList = []
+    totalDuration = 0
+    quarterNotes = 2
+    eighthNotes = 4
+    l = k  - k//2 + 1
+    for i in range(k - l + 1):
+        lmer = kmer[i:i+l]
+        lmerGC = GCcontent(lmer)
+        print(lmerGC)
+        if lmerGC < 0.5 and quarterNotes > 0:
+            durationList.append(0.25)
+            totalDuration += 0.25
+            quarterNotes -= 1
+        elif lmerGC >= 0.5 or eighthNotes > 0:
+            durationList.append(0.125)
+            totalDuration += 0.125
+            eighthNotes -= 1
+    return durationList, totalDuration
+
 def addNote(noteDict, seqChunk, waveType, duration):
     if noteDict[seqChunk] == 'rest':
         note = m.rest(duration)
@@ -40,14 +69,17 @@ def addNote(noteDict, seqChunk, waveType, duration):
 
 def createKmerPhrase(kmer, noteDict):
     chunks = [kmer[i:i+2] for i in range(0, len(kmer), 2)]
-    phrase = addNote(noteDict, chunks[0], 'sine', 1/8)
-    for i in range(1, len(chunks)):
-        note = addNote(noteDict, chunks[i], 'sine', 1/8)
+    durationList, totalDuration = createDurationList(kmer)
+    print(totalDuration)
+    print(durationList)
+    phrase = addNote(noteDict, chunks[0], 'sine', durationList[0])
+    for i in range(1, len(durationList)):
+        note = addNote(noteDict, chunks[i], 'sine', durationList[i])
         phrase = m.join_waves((phrase, note))
     return phrase
 
 def createSeqMelody(seq, k):
-    noteDict = createDict()
+    noteDict = createNoteDict()
     print(noteDict)
     kmers = buildDisjointKmers(seq, k)
     print(kmers)
@@ -57,4 +89,19 @@ def createSeqMelody(seq, k):
         seqMelody = m.join_waves((seqMelody, phrases[i]))
     return seqMelody
 
+def drumBeat():
+    kick = m.sample('kick',0).time_edit(1/4)
+    snare = m.sample('snare',0).time_edit(1/4)
+    hihat = m.sample('hihat',2).time_edit(1/16)
+    kickLoop = m.join_waves((kick, m.rest(1/4))).loop(8)
+    snareLoop = m.join_waves((m.rest(1/4), snare)).loop(8)
+    hihatLoop = m.join_waves((hihat)).loop(32)
 
+    # verify times are the same, if not go back and adjust code
+    kickLoop.time()
+    snareLoop.time()
+    hihatLoop.time()
+
+    # add kick and snare waves together
+    mix = m.add_waves((kickLoop, snareLoop, hihatLoop))
+    return mix
