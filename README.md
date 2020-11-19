@@ -24,7 +24,7 @@
 
 ## Input
 
-`mendel` takes a single FASTA/FASTQ input, and requires the user to specify the k-mer length.
+`mendel` takes a single FASTA/FASTQ input, and requires the user to specify the k- and l-mer lengths.
 
 ## Output data
 
