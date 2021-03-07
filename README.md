@@ -7,7 +7,7 @@
 
 `mendel` uses arbitrary mappings from k-mers of varying length in a sequence, along with density-based MinHash, to create melodic, and vaguely musical, pieces of music from input sequence data. The idea originated from [Song from π!](https://www.youtube.com/watch?v=OMq9he-5HUU) by David Macdonald which was composed in a similar manner (but for the digits of π). 
 
-`mendel` currently outputs a a three-part piece: A drums section (optional), a rhythm section (chords), and a melody section (monophonic). It is currently very much open for any suggestions for improvement, as the musical pieces it outputs are seemingly random, but because of arbitrary musical choices, it's sort pleasing to the ear. 
+`mendel` currently outputs a a three-part piece: A drums section (optional), a rhythm section (chords), and a melody section (monophonic). It is currently very much open for any suggestions for improvement, as the musical pieces it outputs are seemingly random, but because of arbitrary musical choices, it's sort of pleasing to the ear. 
 
 ## Requirements
 
