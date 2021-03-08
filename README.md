@@ -13,24 +13,13 @@
 
 [Music-Code](https://github.com/wesleyLaurence/Music-Code), and any requirements within, along with a working Python environment, are required.
 
-
-## Installation
-
-
-## Quick start
-
-
-## Overview
-
 ## Input
 
-`mendel` takes a single FASTA/FASTQ input, and requires the user to specify the k- and l-mer lengths.
+`mendel` takes a single FASTA/FASTQ input, and requires the user to specify a k-mer length and an output prefix.
 
 ## Output data
 
-
-## Running an example
-
+A single (.wav) file will be generated in the directory, prefixed by the input prefix.
 
 ## License
 
